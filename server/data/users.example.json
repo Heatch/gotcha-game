@@ -1,0 +1,5 @@
+[
+  {"name":"Alice","password":"example1","pseudonym":"CheeryTiger42","missions":[{"mission":"Get someone to compliment your hair","status":"completed","last_edit":"2025-07-22","gotted":"Bob","comments":"Told him he looked like a movie star"}],"selection_complete":true,"selection_pool":[],"score":1,"asks":0,"gotted_history":["Bob"]},
+  {"name":"Bob","password":"example2","pseudonym":"RustyFalcon17","missions":[{"mission":"Get someone to dab","status":"open","last_edit":"","gotted":"","comments":""},{"mission":"Make someone say moist","status":"failed","last_edit":"","gotted":"","comments":""}],"selection_complete":false,"selection_pool":[5,12],"score":0,"asks":2,"gotted_history":[]},
+  {"name":"Carol","password":"example3","pseudonym":"SunnyDolphin83","missions":[],"selection_complete":false,"selection_pool":[],"score":0,"asks":0,"gotted_history":[]}
+]
