@@ -25,17 +25,18 @@ export default function MissionSelector({ initialCards, initialSelected }: Props
     if (selecting) return;
     setSelecting(true);
     const result = await selectMission(user!.name, missionId);
+    const newMission = { mission: result.selected.mission, status: 'open', last_edit: '', gotted: '', comments: '' };
     if (result.complete) {
       setUser({
         ...user!,
-        missions: [...user!.missions, result.selected],
+        missions: [...user!.missions, newMission],
         selection_complete: true,
         selection_pool: [],
       });
     } else {
       setUser({
         ...user!,
-        missions: [...user!.missions, result.selected],
+        missions: [...user!.missions, newMission],
         selection_pool: result.nextPool.map((c: Card) => c.id),
       });
       setTimeout(() => {

@@ -15,7 +15,7 @@ export function useSocket() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io({ transports: ['websocket', 'polling'] });
+    const socket = io('http://localhost:3001', { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
 
     socket.on('connect', () => setConnected(true));
