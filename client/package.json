@@ -16,10 +16,15 @@
     "vite": "^5.4.0"
   },
   "dependencies": {
+    "@iconify-json/material-symbols": "^1.2.86",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
     "framer-motion": "^11.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-router-dom": "^6.26.0",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "unplugin-icons": "^23.0.1"
   }
 }

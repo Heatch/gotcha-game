@@ -7,6 +7,7 @@ Mobile-first web app for the "gotcha!" party game (inspired by "Don't Get Got").
 - **Frontend:** React 18 + TypeScript, Vite 5, react-router-dom v6, framer-motion
 - **Backend:** Node.js + Express (port 3001), Socket.IO
 - **Styling:** Plain CSS with CSS custom properties for theming, Nunito (Google Fonts)
+- **Icons:** Google Material Symbols via `unplugin-icons` (no emojis)
 
 ## Project Structure
 ```
@@ -125,6 +126,21 @@ gotcha/
 - Cannot select same player twice
 - Auto-clears when ALL other players have been gotted once
 - "Group" never tracked
+
+## Visual Design: Manila Folder Motif
+The wallet page uses a physical folder metaphor:
+- **Folder tab** — `.folder-tab`, positioned above the body, rounded top corners only, slightly darker than body
+- **Folder body** — `.folder-body`, manila-colored backdrop (`--folder-bg`), rounded corners except top-left where tab connects
+- **Paper cards** — `.wallet-card` inside `.folder-card-wrapper`, rotated ±2.5deg alternating, vertical overlap via negative margin
+- **Grain texture** — SVG noise `::before` on cards at 0.04 (light) / 0.03 (dark) opacity for handmade paper feel
+- **Expansion** — when a card is expanded, wrapper un-rotates to 0deg (0.3s transition) and z-index rises to 10
+- Folder colours use CSS custom properties (`--folder-bg`, `--folder-tab`, `--folder-border`) with light/dark variants
+
+## Icon Policy
+- **No emojis.** All icons use Google Material Symbols (outline style) via `unplugin-icons`.
+- Import pattern: `import IconName from '~icons/material-symbols/<icon-name>'`
+- Compile to React components via `@svgr/core` + `@svgr/plugin-jsx`
+- See `.opencode/conventions.md` for the full icon reference map
 
 ## Key Patterns
 

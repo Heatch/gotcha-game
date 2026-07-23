@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
 import { useAuth } from '../context/AuthContext';
+import IconVisibility from '~icons/material-symbols/visibility-outline';
+import IconVisibilityOff from '~icons/material-symbols/visibility-off-outline';
 
 export default function LoginForm() {
   const { setUser } = useAuth();
@@ -62,7 +64,7 @@ export default function LoginForm() {
           tabIndex={-1}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
-          {showPassword ? '\uD83D\uDE48' : '\uD83D\uDC41'}
+          {showPassword ? <IconVisibilityOff /> : <IconVisibility />}
         </button>
       </div>
       {error && <p className="login-error">{error}</p>}

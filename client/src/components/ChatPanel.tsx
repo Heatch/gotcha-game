@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, type ChatMessage } from '../hooks/useSocket';
 import { useAuth } from '../context/AuthContext';
+import IconClose from '~icons/material-symbols/close';
 
 interface Props {
   open: boolean;
@@ -37,7 +38,7 @@ export default function ChatPanel({ open, onClose }: Props) {
         >
           <div className="chat-header">
             <h3>Chat</h3>
-            <button className="chat-close" onClick={onClose}>&#10005;</button>
+            <button className="chat-close" onClick={onClose}><IconClose /></button>
           </div>
           <div className="chat-messages">
             {messages.map((m: ChatMessage, i: number) => (

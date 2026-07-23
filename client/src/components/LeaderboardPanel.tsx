@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUsers } from '../api';
+import IconClose from '~icons/material-symbols/close';
 
 interface LeaderboardUser {
   name: string;
@@ -12,8 +13,6 @@ interface Props {
   open: boolean;
   onClose: () => void;
 }
-
-const medals: Record<number, string> = { 1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49' };
 
 export default function LeaderboardPanel({ open, onClose }: Props) {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
@@ -44,12 +43,12 @@ export default function LeaderboardPanel({ open, onClose }: Props) {
           >
             <div className="leaderboard-header">
               <h3>Leaderboard</h3>
-              <button className="chat-close" onClick={onClose}>&#10005;</button>
+              <button className="chat-close" onClick={onClose}><IconClose /></button>
             </div>
             <div className="leaderboard-list">
               {sorted.map((u, i) => (
                 <div key={u.name} className={`leaderboard-row ${i < 3 ? `pos-${i + 1}` : ''}`}>
-                  <span className="lb-rank">{medals[i + 1] || `#${i + 1}`}</span>
+                  <span className="lb-rank">#{i + 1}</span>
                   <span className="lb-name">{u.pseudonym}</span>
                   <span className="lb-score">{u.score} pts</span>
                 </div>

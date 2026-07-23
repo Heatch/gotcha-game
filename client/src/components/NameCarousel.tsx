@@ -1,3 +1,6 @@
+import IconGroup from '~icons/material-symbols/group-outline';
+import IconArrowBack from '~icons/material-symbols/arrow-back';
+
 interface Props {
   names: string[];
   gottedHistory: string[];
@@ -7,14 +10,21 @@ interface Props {
 
 export default function NameCarousel({ names, gottedHistory, onSelect, onBack }: Props) {
   const others = names.filter(n => n !== 'Group');
-  const allOptions = ['Group', ...others];
 
   return (
     <div className="name-carousel">
-      <button className="carousel-back" onClick={onBack} aria-label="Go back">&#8592;</button>
+      <button className="carousel-back" onClick={onBack} aria-label="Go back">
+        <IconArrowBack />
+      </button>
       <div className="name-chips">
-        {allOptions.map(n => {
-          const isGotted = n !== 'Group' && gottedHistory.includes(n);
+        <button
+          className="name-chip"
+          onClick={() => onSelect('Group')}
+        >
+          <IconGroup /> Group
+        </button>
+        {others.map(n => {
+          const isGotted = gottedHistory.includes(n);
           return (
             <button
               key={n}
@@ -22,7 +32,7 @@ export default function NameCarousel({ names, gottedHistory, onSelect, onBack }:
               onClick={() => !isGotted && onSelect(n)}
               disabled={isGotted}
             >
-              {n === 'Group' ? '\uD83D\uDC65 Group' : n}
+              {n}
             </button>
           );
         })}

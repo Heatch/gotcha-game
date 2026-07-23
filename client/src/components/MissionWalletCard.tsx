@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { updateMissionStatus } from '../api';
 import { useAuth } from '../context/AuthContext';
 import NameCarousel from './NameCarousel';
+import IconEdit from '~icons/material-symbols/edit-outline';
+import IconArrowBack from '~icons/material-symbols/arrow-back';
 
 interface Mission {
   mission: string;
@@ -15,11 +17,12 @@ interface Props {
   mission: Mission;
   index: number;
   allUserNames: string[];
+  isExpanded: boolean;
+  onExpandChanged: (expanded: boolean) => void;
 }
 
-export default function MissionWalletCard({ mission, index, allUserNames }: Props) {
+export default function MissionWalletCard({ mission, index, allUserNames, isExpanded, onExpandChanged }: Props) {
   const { user, setUser } = useAuth();
-  const [expanded, setExpanded] = useState(false);
   const [step, setStep] = useState<'actions' | 'carousel' | 'comments'>('actions');
   const [selectedName, setSelectedName] = useState('');
   const [commentText, setCommentText] = useState('');
@@ -29,7 +32,7 @@ export default function MissionWalletCard({ mission, index, allUserNames }: Prop
   const isLocked = mission.status !== 'open';
 
   function reset() {
-    setExpanded(false);
+    onExpandChanged(false);
     setStep('actions');
     setSelectedName('');
     setCommentText('');
@@ -75,15 +78,15 @@ export default function MissionWalletCard({ mission, index, allUserNames }: Prop
         {!isLocked && (
           <button
             className="pencil-btn"
-            onClick={() => { reset(); setExpanded(!expanded); }}
+            onClick={() => { reset(); onExpandChanged(!isExpanded); }}
             aria-label="Edit mission status"
           >
-            &#9998;
+            <IconEdit />
           </button>
         )}
       </div>
 
-      {expanded && !isLocked && step === 'actions' && (
+      {isExpanded && !isLocked && step === 'actions' && (
         <div className="wallet-card-actions">
           {confirmFail ? (
             <div className="fail-confirm">
@@ -102,7 +105,7 @@ export default function MissionWalletCard({ mission, index, allUserNames }: Prop
         </div>
       )}
 
-      {expanded && !isLocked && step === 'carousel' && (
+      {isExpanded && !isLocked && step === 'carousel' && (
         <NameCarousel
           names={allUserNames}
           gottedHistory={user?.gotted_history || []}
@@ -111,9 +114,11 @@ export default function MissionWalletCard({ mission, index, allUserNames }: Prop
         />
       )}
 
-      {expanded && !isLocked && step === 'comments' && (
+      {isExpanded && !isLocked && step === 'comments' && (
         <div className="comments-section">
-          <button className="carousel-back" onClick={() => setStep('carousel')} aria-label="Go back">&#8592;</button>
+          <button className="carousel-back" onClick={() => setStep('carousel')} aria-label="Go back">
+            <IconArrowBack />
+          </button>
           <textarea
             className="comment-input"
             placeholder="How did you get them? (optional)"

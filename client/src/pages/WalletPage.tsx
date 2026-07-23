@@ -6,6 +6,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import MissionWalletCard from '../components/MissionWalletCard';
 import ChatPanel from '../components/ChatPanel';
 import LeaderboardPanel from '../components/LeaderboardPanel';
+import IconChat from '~icons/material-symbols/chat-outline';
+import IconLeaderboard from '~icons/material-symbols/leaderboard-outline';
 
 export default function WalletPage() {
   const { user } = useAuth();
@@ -14,6 +16,7 @@ export default function WalletPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) { navigate('/'); return; }
@@ -39,25 +42,40 @@ export default function WalletPage() {
         <p className="wallet-score">score: {user.score || 0}</p>
       </header>
 
-      <h2 className="wallet-subtitle">Mission Wallet</h2>
-
-      <div className="wallet-cards">
-        {user.missions.map((m, i) => (
-          <MissionWalletCard
-            key={i}
-            mission={m}
-            index={i}
-            allUserNames={allNames}
-          />
-        ))}
+      <div className="folder-container">
+        <div className="folder-tab">Mission Wallet</div>
+        <div className="folder-body">
+          <div className="folder-cards-stack">
+            {user.missions.map((m, i) => (
+              <div
+                key={i}
+                className={`folder-card-wrapper ${expandedIndex === i ? 'expanded' : ''}`}
+                style={{
+                  transform: expandedIndex === i
+                    ? 'rotate(0deg)'
+                    : `rotate(${i % 2 === 0 ? -1.5 : 1.5}deg)`,
+                  zIndex: expandedIndex === i ? 10 : i + 1,
+                }}
+              >
+                <MissionWalletCard
+                  mission={m}
+                  index={i}
+                  allUserNames={allNames}
+                  isExpanded={expandedIndex === i}
+                  onExpandChanged={(expanded) => setExpandedIndex(expanded ? i : null)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="wallet-bottom-bar">
         <button className="icon-btn" onClick={() => setChatOpen(true)}>
-          &#128172;
+          <IconChat />
         </button>
         <button className="icon-btn" onClick={() => setLeaderboardOpen(true)}>
-          &#127942;
+          <IconLeaderboard />
         </button>
       </div>
 

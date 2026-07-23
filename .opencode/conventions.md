@@ -45,4 +45,27 @@
 ## Routing
 - `react-router-dom` v7 with `<BrowserRouter>`
 - Protected routes use the `<ProtectedRoute>` wrapper component
-- URL structure: `/` (login), `/missions` (selection), `/wallet` (placeholder)
+- URL structure: `/` (login), `/missions` (selection), `/wallet` (wallet)
+
+## Icons
+- **No emojis in the UI.** Use Google Material Symbols via `unplugin-icons`.
+- Icons are imported from `~icons/material-symbols/<icon-name>` and used as React components.
+- Preferred style: `-outline` variants for a consistent, lightweight look.
+- Close/cancel: `material-symbols:close`
+- Navigation/back: `material-symbols:arrow-back`
+- Editing: `material-symbols:edit-outline`
+- Theme (light mode): `material-symbols:dark-mode-outline`
+- Theme (dark mode): `material-symbols:light-mode-outline`
+- Password toggle: `material-symbols:visibility-outline` / `material-symbols:visibility-off-outline`
+- Chat: `material-symbols:chat-outline`
+- Leaderboard: `material-symbols:leaderboard-outline`
+- Groups: `material-symbols:group-outline`
+- Icons render as inline SVGs (`width: 1em, height: 1em`), sized via parent `font-size`.
+- SVG buttons should use `line-height: 0` and `display: flex; align-items: center` for proper alignment.
+
+## Visual Design
+- **Manila folder motif** on the wallet page: tab + body construction with loose paper cards inside.
+- Cards should feel like physical paper: slight rotation (±2.5deg alternating), negative margin overlap, subtle grain texture via SVG noise `::before` pseudo-element.
+- Folder colours defined as CSS custom properties (`--folder-bg`, `--folder-tab`, `--folder-border`) for light/dark.
+- When a card is expanded, it un-rotates to 0deg and rises above the stack (z-index 10).
+- All theme colours must have both `:root`/`[data-theme="light"]` and `[data-theme="dark"]` variants.
