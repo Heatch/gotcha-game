@@ -16,11 +16,13 @@
   --folder-tab: #ded0b0;
   --folder-border: #d4c0a0;
   --chat-user: #8b7fca;
+  --bg-other-chat-card: #f8f6f2;
 }
 
 [data-theme="dark"] {
   --bg: #1a1a2e;
   --bg-card: #252540;
+  --bg-other-chat-card: #40405c;
   --text: #e8e4df;
   --text-secondary: #9d9ba6;
   --accent: #8fbc8f;
@@ -553,10 +555,18 @@ body {
   border: 1px solid rgba(192, 57, 43, 0.2);
 }
 
-.chat-bubble.user {
+.chat-bubble.user.own {
   align-self: flex-end;
   background: var(--chat-user);
   color: #fff;
+}
+
+.chat-bubble.user.other {
+  align-self: flex-start;
+  background: var(--bg-other-chat-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  color: var(--text);
 }
 
 .chat-sender {
