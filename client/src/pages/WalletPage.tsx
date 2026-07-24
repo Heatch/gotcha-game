@@ -1,30 +1,89 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { getUsers } from '../api';
+import { useAuth, type WalletEntry } from '../context/AuthContext';
+import { getUsers, checkRefill, refreshUser } from '../api';
 import ThemeToggle from '../components/ThemeToggle';
 import MissionWalletCard from '../components/MissionWalletCard';
 import ChatPanel from '../components/ChatPanel';
 import LeaderboardPanel from '../components/LeaderboardPanel';
+import InfoPanel from '../components/InfoPanel';
 import IconChat from '~icons/material-symbols/chat-outline';
 import IconLeaderboard from '~icons/material-symbols/leaderboard-outline';
+import IconInfo from '~icons/material-symbols/info-outline';
+
+interface DisplayCard {
+  mission: string;
+  status: string;
+  last_edit: string;
+  gotted: string;
+  comments: string;
+  slotIndex: number | null;
+}
 
 export default function WalletPage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [allNames, setAllNames] = useState<string[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [refillEligible, setRefillEligible] = useState(false);
+  const [countdown, setCountdown] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) { navigate('/'); return; }
+
+    refreshUser(user.name).then(data => {
+      if (data.name) setUser(data);
+    });
+
+    const hasNullSlots = (user.missions || []).some(m => m === null);
+    if (hasNullSlots) {
+      checkRefill(user.name).then(data => {
+        if (data.eligible) setRefillEligible(true);
+      });
+    }
+
     getUsers().then(data => {
       setAllNames(data.map((u: { name: string }) => u.name));
       setLoading(false);
     });
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user || refillEligible) return;
+    const cd = user.slot_cooldowns;
+    const ms = user.missions;
+    if (!cd || !ms) return;
+
+    function update() {
+      const now = Date.now();
+      let earliest: number | null = null;
+      for (let i = 0; i < 5; i++) {
+        const cdi = cd[i];
+        if (ms[i] === null && cdi) {
+          const t = new Date(cdi).getTime();
+          if (t > now && (earliest === null || t < earliest)) {
+            earliest = t;
+          }
+        }
+      }
+      if (earliest === null) {
+        setCountdown(null);
+        return;
+      }
+      const diff = Math.max(0, earliest - now);
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${m}m ${s.toString().padStart(2, '0')}s`);
+    }
+
+    update();
+    const iv = setInterval(update, 1000);
+    return () => clearInterval(iv);
+  }, [user, refillEligible]);
 
   if (!user || loading) {
     return (
@@ -34,21 +93,43 @@ export default function WalletPage() {
     );
   }
 
+  const activeCards: DisplayCard[] = (user.missions || [])
+    .filter((m): m is NonNullable<typeof m> => m !== null)
+    .map(m => ({ ...m, slotIndex: (user.missions || []).indexOf(m) }));
+
+  const walletCards: DisplayCard[] = (user.wallet || []).map((w: WalletEntry) => ({
+    mission: w.mission,
+    status: w.status,
+    last_edit: w.timestamp,
+    gotted: w.gotted,
+    comments: w.comments,
+    slotIndex: null,
+  }));
+
+  const allCards: DisplayCard[] = [...walletCards.reverse(), ...activeCards];
+
   return (
     <div className="page wallet-page">
       <ThemeToggle />
+      <button className="info-btn" onClick={() => setInfoOpen(true)} aria-label="How to play">
+        <IconInfo />
+      </button>
       <header className="wallet-header">
         <h1>gotcha!</h1>
-        <p className="wallet-score">score: {user.score || 0}</p>
+        <p className="wallet-score">score: {user.completed_count ?? 0}</p>
       </header>
+
+      {(user.completed_count ?? 0) >= 3 && (
+        <div className="win-banner">You've won! Keep playing to fill your wallet.</div>
+      )}
 
       <div className="folder-container">
         <div className="folder-tab">Mission Wallet</div>
-        <div className="folder-body">
+        <div className="folder-body wallet-scroll">
           <div className="folder-cards-stack">
-            {user.missions.map((m, i) => (
+            {allCards.map((c, i) => (
               <div
-                key={i}
+                key={c.slotIndex !== null ? `slot-${c.slotIndex}` : `wallet-${i}-${c.mission.slice(0, 10)}`}
                 className={`folder-card-wrapper ${expandedIndex === i ? 'expanded' : ''}`}
                 style={{
                   transform: expandedIndex === i
@@ -58,8 +139,8 @@ export default function WalletPage() {
                 }}
               >
                 <MissionWalletCard
-                  mission={m}
-                  index={i}
+                  mission={c}
+                  index={c.slotIndex !== null ? c.slotIndex : -1}
                   allUserNames={allNames}
                   isExpanded={expandedIndex === i}
                   onExpandChanged={(expanded) => setExpandedIndex(expanded ? i : null)}
@@ -68,6 +149,19 @@ export default function WalletPage() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="refill-section">
+        {refillEligible && (
+          <div className="refill-banner" onClick={() => navigate('/missions?refill=true')}>
+            New mission available — tap to pick!
+          </div>
+        )}
+        {!refillEligible && countdown && (
+          <div className="countdown-banner">
+            Next mission in {countdown}
+          </div>
+        )}
       </div>
 
       <div className="wallet-bottom-bar">
@@ -81,6 +175,7 @@ export default function WalletPage() {
 
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
       <LeaderboardPanel open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+      <InfoPanel open={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
   );
 }

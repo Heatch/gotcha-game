@@ -107,7 +107,7 @@ export default function MissionWalletCard({ mission, index, allUserNames, isExpa
 
       {isExpanded && !isLocked && step === 'carousel' && (
         <NameCarousel
-          names={allUserNames}
+          names={allUserNames.filter(n => n !== user?.name)}
           gottedHistory={user?.gotted_history || []}
           onSelect={handleNameSelect}
           onBack={() => setStep('actions')}

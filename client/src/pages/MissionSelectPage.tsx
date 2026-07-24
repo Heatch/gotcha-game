@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getMissionPool } from '../api';
 import MissionSelector from '../components/MissionSelector';
@@ -8,6 +8,9 @@ import ThemeToggle from '../components/ThemeToggle';
 export default function MissionSelectPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isRefill = searchParams.get('refill') === 'true';
+
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState<{ id: number; mission: string }[]>([]);
   const [selected, setSelected] = useState(0);
@@ -17,12 +20,12 @@ export default function MissionSelectPage() {
       navigate('/');
       return;
     }
-    if (user.selection_complete || user.missions.length >= 5) {
+    if (!isRefill && user.selection_complete) {
       navigate('/wallet');
       return;
     }
-    getMissionPool(user.name).then(data => {
-      if (data.complete) {
+    getMissionPool(user.name, isRefill).then(data => {
+      if (!isRefill && data.complete) {
         navigate('/wallet');
       } else {
         setCards(data.cards);
@@ -30,7 +33,7 @@ export default function MissionSelectPage() {
         setLoading(false);
       }
     });
-  }, [user, navigate]);
+  }, [user, navigate, isRefill]);
 
   if (loading) {
     return (
@@ -43,8 +46,15 @@ export default function MissionSelectPage() {
   return (
     <div className="page mission-page">
       <ThemeToggle />
-      <h1 className="page-title">Select your mission</h1>
-      <MissionSelector initialCards={cards} initialSelected={selected} />
+      <h1 className="page-title">
+        {isRefill ? 'New mission available — pick one' : 'Select your mission'}
+      </h1>
+      <MissionSelector
+        initialCards={cards}
+        initialSelected={selected}
+        total={isRefill ? 1 : 5}
+        refillMode={isRefill}
+      />
     </div>
   );
 }

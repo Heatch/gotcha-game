@@ -6,7 +6,7 @@ router.get('/names', (req, res) => {
   const names = users.map(u => ({
     name: u.name,
     pseudonym: u.pseudonym || u.name,
-    score: u.score || 0
+    score: u.completed_count || 0
   }));
   res.json(names);
 });

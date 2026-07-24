@@ -8,13 +8,25 @@ export interface UserMission {
   comments: string;
 }
 
+export interface WalletEntry {
+  mission: string;
+  status: string;
+  timestamp: string;
+  gotted: string;
+  comments: string;
+}
+
 export interface User {
   name: string;
-  missions: UserMission[];
+  missions: (UserMission | null)[];
+  slot_cooldowns: (string | null)[];
+  wallet: WalletEntry[];
+  completed_count: number;
+  success_cooldown_count: number;
+  fail_cooldown_count: number;
   selection_complete: boolean;
   selection_pool: number[];
   score: number;
-  asks: number;
   gotted_history: string[];
 }
 

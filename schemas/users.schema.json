@@ -2,29 +2,56 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "User",
   "type": "object",
-  "required": ["name", "password", "pseudonym", "missions", "selection_complete", "selection_pool", "score", "asks", "gotted_history"],
+  "required": ["name", "password", "pseudonym", "missions", "slot_cooldowns", "wallet", "completed_count", "success_cooldown_count", "fail_cooldown_count", "selection_complete", "selection_pool", "score", "gotted_history"],
   "properties": {
-    "name": { "type": "string", "description": "Display/login name" },
-    "password": { "type": "string", "description": "Plain-text password (friendly game)" },
-    "pseudonym": { "type": "string", "pattern": "^[A-Z][a-z]+[A-Z][a-z]+\\d{2}$", "description": "Generated anonymous name for leaderboard" },
+    "name": { "type": "string" },
+    "password": { "type": "string" },
+    "pseudonym": { "type": "string", "pattern": "^[A-Z][a-z]+[A-Z][a-z]+\\d{2}$" },
     "missions": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "oneOf": [
+          { "type": "null" },
+          {
+            "type": "object",
+            "required": ["mission", "status", "last_edit", "gotted", "comments"],
+            "properties": {
+              "mission": { "type": "string" },
+              "status": { "type": "string", "enum": ["open", "failed", "completed"] },
+              "last_edit": { "type": "string" },
+              "gotted": { "type": "string" },
+              "comments": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "slot_cooldowns": {
+      "type": "array",
+      "maxItems": 5,
+      "items": { "type": ["string", "null"] }
+    },
+    "wallet": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["mission", "status", "last_edit", "gotted", "comments"],
+        "required": ["mission", "status", "timestamp", "gotted", "comments"],
         "properties": {
           "mission": { "type": "string" },
-          "status": { "type": "string", "enum": ["open", "failed", "completed"] },
-          "last_edit": { "type": "string" },
+          "status": { "type": "string", "enum": ["completed", "failed"] },
+          "timestamp": { "type": "string" },
           "gotted": { "type": "string" },
           "comments": { "type": "string" }
         }
       }
     },
+    "completed_count": { "type": "integer", "minimum": 0 },
+    "success_cooldown_count": { "type": "integer", "minimum": 0 },
+    "fail_cooldown_count": { "type": "integer", "minimum": 0 },
     "selection_complete": { "type": "boolean" },
     "selection_pool": { "type": "array", "items": { "type": "number" } },
     "score": { "type": "integer" },
-    "asks": { "type": "integer" },
-    "gotted_history": { "type": "array", "items": { "type": "string" }, "description": "Names user has gotted; resets after full cycle" }
+    "gotted_history": { "type": "array", "items": { "type": "string" } }
   }
 }

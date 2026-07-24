@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { selectMission } from '../api';
 import { useAuth } from '../context/AuthContext';
 import MissionCard from './MissionCard';
@@ -13,10 +14,13 @@ interface Card {
 interface Props {
   initialCards: Card[];
   initialSelected: number;
+  total?: number;
+  refillMode?: boolean;
 }
 
-export default function MissionSelector({ initialCards, initialSelected }: Props) {
+export default function MissionSelector({ initialCards, initialSelected, total = 5, refillMode = false }: Props) {
   const { user, setUser } = useAuth();
+  const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [selected, setSelected] = useState(initialSelected);
   const [selecting, setSelecting] = useState(false);
@@ -24,21 +28,21 @@ export default function MissionSelector({ initialCards, initialSelected }: Props
   async function handleSelect(missionId: number) {
     if (selecting) return;
     setSelecting(true);
-    const result = await selectMission(user!.name, missionId);
-    const newMission = { mission: result.selected.mission, status: 'open', last_edit: '', gotted: '', comments: '' };
+    const result = await selectMission(user!.name, missionId, refillMode);
+
+    if (refillMode && result.user) {
+      setUser(result.user);
+      navigate('/wallet');
+      return;
+    }
+
+    if (result.user) {
+      setUser(result.user);
+    }
+
     if (result.complete) {
-      setUser({
-        ...user!,
-        missions: [...user!.missions, newMission],
-        selection_complete: true,
-        selection_pool: [],
-      });
+      navigate('/wallet');
     } else {
-      setUser({
-        ...user!,
-        missions: [...user!.missions, newMission],
-        selection_pool: result.nextPool.map((c: Card) => c.id),
-      });
       setTimeout(() => {
         setCards(result.nextPool);
         setSelected((s: number) => s + 1);
@@ -49,7 +53,7 @@ export default function MissionSelector({ initialCards, initialSelected }: Props
 
   return (
     <div className="mission-selector">
-      <ProgressBar selected={user?.missions.length || selected} total={5} />
+      <ProgressBar selected={selected} total={total} />
       <AnimatePresence mode="wait">
         <div className="cards-container" key={cards.map((c: Card) => c.id).join('-')}>
           {cards.map((card: Card, i: number) => (
