@@ -10,12 +10,20 @@ const usersRoutes = require('./routes/users');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*' }
-});
-const PORT = 3001;
 
-app.use(cors());
+// Set this on Render (both server and client services) once your client is deployed,
+// e.g. https://your-client-name.onrender.com
+// Falls back to localhost so local dev still works unchanged.
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+
+const io = new Server(server, {
+  cors: { origin: CLIENT_ORIGIN }
+});
+
+// Render assigns this dynamically — hardcoding 3001 will break the deploy.
+const PORT = process.env.PORT || 3001;
+
+app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(express.json());
 
 const dataDir = path.join(__dirname, 'data');
@@ -60,10 +68,15 @@ io.on('connection', (socket) => {
   });
 });
 
+// Simple root route so hitting the bare domain doesn't show "Cannot GET /"
+app.get('/', (req, res) => {
+  res.send('Gotcha API is running');
+});
+
 app.use('/api', authRoutes);
 app.use('/api/missions', missionRoutes);
 app.use('/api/users', usersRoutes);
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
