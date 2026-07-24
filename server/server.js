@@ -11,19 +11,17 @@ const usersRoutes = require('./routes/users');
 const app = express();
 const server = http.createServer(app);
 
-// Set this on Render (both server and client services) once your client is deployed,
-// e.g. https://your-client-name.onrender.com
-// Falls back to localhost so local dev still works unchanged.
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const CLIENT_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map(s => s.trim());
 
 const io = new Server(server, {
-  cors: { origin: CLIENT_ORIGIN }
+  cors: { origin: CLIENT_ORIGINS }
 });
 
-// Render assigns this dynamically — hardcoding 3001 will break the deploy.
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: CLIENT_ORIGIN }));
+app.use(cors({ origin: CLIENT_ORIGINS }));
 app.use(express.json());
 
 const dataDir = path.join(__dirname, 'data');
