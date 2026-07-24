@@ -30,7 +30,7 @@ export default function InfoPanel({ open, onClose }: Props) {
             <div className="info-content">
               <div className="info-section">
                 <h4>Goal</h4>
-                <p>Each player gets a collection of secret missions. Complete them by getting other players to do the thing without them realising it's a mission. Most completions wins.</p>
+                <p>Each player gets a collection of secret missions. Complete them by getting other players to do the thing without them realising it's a mission.</p>
               </div>
               <div className="info-section">
                 <h4>Completing a mission</h4>
@@ -56,7 +56,7 @@ export default function InfoPanel({ open, onClose }: Props) {
                 <h4>Secrets</h4>
                 <p>Don't show anyone your mission list! The surprise is the whole point.</p>
               </div>
-              <p className="info-footer">Names on the leaderboard are random pseudonyms &mdash; the winner is revealed at the very end!</p>
+              <p className="info-footer">Names on the leaderboard are random pseudonyms &mdash; keep playing to fill your wallet!</p>
             </div>
           </motion.div>
         </motion.div>

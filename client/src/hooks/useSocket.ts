@@ -15,11 +15,13 @@ export function useSocket() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io(import.meta.env.PROD ? undefined : 'http://localhost:3001', { transports: ['websocket', 'polling'] });
+    const url = import.meta.env.PROD ? undefined : 'http://localhost:3001';
+    const socket = io(url, { transports: ['polling', 'websocket'] });
     socketRef.current = socket;
 
-    socket.on('connect', () => setConnected(true));
-    socket.on('disconnect', () => setConnected(false));
+    socket.on('connect', () => { setConnected(true); console.log('[socket] connected', socket.id); });
+    socket.on('disconnect', (reason) => { setConnected(false); console.log('[socket] disconnected', reason); });
+    socket.on('connect_error', (err) => { console.log('[socket] connect_error', err.message); });
     socket.on('chat_history', (msgs: ChatMessage[]) => setMessages(msgs));
     socket.on('chat_message', (msg: ChatMessage) => {
       setMessages(prev => [...prev.slice(-199), msg]);

@@ -73,13 +73,12 @@
 ## How to Play / Rules
 - The rules content lives in `InfoPanel.tsx`.
 - **Must be updated** whenever new game logic is introduced (e.g. mission refresh mechanics, new rules, rule changes). Keep it in sync with the actual game behaviour.
-- Leaderboard includes a note that names are anonymous pseudonyms until the winner is revealed.
+- Leaderboard shows anonymous pseudonyms and scores.
 
 ## Mission Cooldown & Wallet
 - **Slots:** Each user has 5 active mission slots (`missions[5]`). Slots can be `null` (empty/on cooldown).
 - **Cooldown:** Completing or failing a mission triggers a cooldown on that slot before it refills.
-  - Success cooldown: `min(5 * 2^n, 360)` minutes, where n = `success_cooldown_count`
-  - Fail cooldown: `min(5 * 2^(n+1), 360)` minutes, where n = `fail_cooldown_count`
+  - Cooldown: `min(5 * 2^n, 360)` minutes, where n = `cooldown_count`. Doubles each time regardless of success/failure.
   - Counters never reset. Fail is always one tier worse than success.
 - **Wallet:** Completed and failed missions are appended to `wallet[]` (permanent history).
 - **Refill:** When a slot's cooldown expires, the wallet page shows a banner. Player picks from 2 cards to fill one slot at a time.

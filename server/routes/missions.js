@@ -11,11 +11,7 @@ function pickRandom(arr, count) {
   return shuffled.slice(0, count);
 }
 
-function successCooldown(n) {
-  return Math.min(5 * Math.pow(2, Number(n) || 0), CAP);
-}
-
-function failCooldown(n) {
+function cooldownMinutes(n) {
   return Math.min(5 * Math.pow(2, Number(n) || 0), CAP);
 }
 
@@ -167,17 +163,17 @@ router.post('/status', (req, res) => {
   const now = new Date().toISOString();
 
   if (!user.wallet) user.wallet = [];
-  if (user.success_cooldown_count == null) user.success_cooldown_count = 0;
-  if (user.fail_cooldown_count == null) user.fail_cooldown_count = 0;
-  user.success_cooldown_count = Number(user.success_cooldown_count);
-  user.fail_cooldown_count = Number(user.fail_cooldown_count);
+  if (user.cooldown_count == null) user.cooldown_count = 0;
+  user.cooldown_count = Number(user.cooldown_count);
   if (user.completed_count === undefined) user.completed_count = 0;
   user.completed_count = Number(user.completed_count);
 
+  const cooldown = cooldownMinutes(user.cooldown_count);
+  user.cooldown_count += 1;
+  user.slot_cooldowns[missionIndex] = new Date(Date.now() + cooldown * 60000).toISOString();
+
   if (status === 'completed') {
-    const cooldown = successCooldown(user.success_cooldown_count);
     user.completed_count += 1;
-    user.success_cooldown_count += 1;
     user.wallet.push({
       mission: mission.mission,
       status: 'completed',
@@ -185,7 +181,6 @@ router.post('/status', (req, res) => {
       gotted: gotted || '',
       comments: comments || ''
     });
-    user.slot_cooldowns[missionIndex] = new Date(Date.now() + cooldown * 60000).toISOString();
 
     if (gotted && gotted !== 'Group') {
       if (!user.gotted_history) user.gotted_history = [];
@@ -203,8 +198,6 @@ router.post('/status', (req, res) => {
       timestamp: now
     });
   } else {
-    const cooldown = failCooldown(user.fail_cooldown_count);
-    user.fail_cooldown_count += 1;
     user.wallet.push({
       mission: mission.mission,
       status: 'failed',
@@ -212,7 +205,6 @@ router.post('/status', (req, res) => {
       gotted: '',
       comments: ''
     });
-    user.slot_cooldowns[missionIndex] = new Date(Date.now() + cooldown * 60000).toISOString();
 
     req.app.locals.addChatMessage({
       type: 'system_fail',
