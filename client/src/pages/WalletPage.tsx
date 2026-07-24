@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type WalletEntry } from '../context/AuthContext';
 import { getUsers, checkRefill, refreshUser } from '../api';
@@ -31,26 +31,32 @@ export default function WalletPage() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [refillEligible, setRefillEligible] = useState(false);
   const [countdown, setCountdown] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     if (!user) { navigate('/'); return; }
 
-    refreshUser(user.name).then(data => {
-      if (data.name) setUser(data);
-    });
+    refreshUser(user.name)
+      .then(data => { if (data.name) setUser(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
+    getUsers()
+      .then(data => { if (Array.isArray(data)) setAllNames(data.map((u: { name: string }) => u.name)); })
+      .catch(() => {});
+
+    initialLoadDone.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!user || !initialLoadDone.current) return;
     const hasNullSlots = (user.missions || []).some(m => m === null);
     if (hasNullSlots) {
-      checkRefill(user.name).then(data => {
-        if (data.eligible) setRefillEligible(true);
-      });
+      checkRefill(user.name)
+        .then(data => { if (data.eligible) setRefillEligible(true); })
+        .catch(() => {});
     }
-
-    getUsers().then(data => {
-      setAllNames(data.map((u: { name: string }) => u.name));
-      setLoading(false);
-    });
-  }, [user, navigate]);
+  }, [user]);
 
   useEffect(() => {
     if (!user || refillEligible) return;
@@ -61,20 +67,32 @@ export default function WalletPage() {
     function update() {
       const now = Date.now();
       let earliest: number | null = null;
+      let hasExpired = false;
       for (let i = 0; i < 5; i++) {
-        const cdi = cd[i];
-        if (ms[i] === null && cdi) {
-          const t = new Date(cdi).getTime();
-          if (t > now && (earliest === null || t < earliest)) {
-            earliest = t;
+        if (ms[i] === null) {
+          const cdi = cd[i];
+          if (!cdi) {
+            hasExpired = true;
+          } else {
+            const t = new Date(cdi).getTime();
+            if (t <= now) {
+              hasExpired = true;
+            } else if (earliest === null || t < earliest) {
+              earliest = t;
+            }
           }
         }
+      }
+      if (hasExpired) {
+        setRefillEligible(true);
+        setCountdown(null);
+        return;
       }
       if (earliest === null) {
         setCountdown(null);
         return;
       }
-      const diff = Math.max(0, earliest - now);
+      const diff = earliest - now;
       const m = Math.floor(diff / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       setCountdown(`${m}m ${s.toString().padStart(2, '0')}s`);
@@ -118,6 +136,10 @@ export default function WalletPage() {
         <h1>gotcha!</h1>
         <p className="wallet-score">score: {user.completed_count ?? 0}</p>
       </header>
+
+      {(user.completed_count ?? 0) >= 3 && (
+        <div className="win-banner">You've won! Keep playing to fill your wallet.</div>
+      )}
 
       {(user.completed_count ?? 0) >= 3 && (
         <div className="win-banner">You've won! Keep playing to fill your wallet.</div>

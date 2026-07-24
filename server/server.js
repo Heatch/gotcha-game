@@ -35,16 +35,28 @@ app.locals.writeJSON = writeJSON;
 app.locals.dataDir = dataDir;
 app.locals.io = io;
 
-const messages = [];
+let messages = [];
+try {
+  messages = readJSON('chat.json');
+} catch {
+  messages = [];
+}
+
+function addChatMessage(msg) {
+  messages.push(msg);
+  if (messages.length > 200) messages.shift();
+  writeJSON('chat.json', messages);
+  io.emit('chat_message', msg);
+}
+
+app.locals.addChatMessage = addChatMessage;
 
 io.on('connection', (socket) => {
   socket.emit('chat_history', messages);
 
   socket.on('chat_message', (msg) => {
     const entry = { ...msg, timestamp: new Date().toISOString() };
-    messages.push(entry);
-    if (messages.length > 200) messages.shift();
-    io.emit('chat_message', entry);
+    addChatMessage(entry);
   });
 });
 

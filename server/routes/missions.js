@@ -12,11 +12,11 @@ function pickRandom(arr, count) {
 }
 
 function successCooldown(n) {
-  return Math.min(5 * Math.pow(2, n), CAP);
+  return Math.min(5 * Math.pow(2, Number(n) || 0), CAP);
 }
 
 function failCooldown(n) {
-  return Math.min(5 * Math.pow(2, n + 1), CAP);
+  return Math.min(5 * Math.pow(2, Number(n) || 0), CAP);
 }
 
 function countActiveSlots(user) {
@@ -66,13 +66,13 @@ router.get('/pool', (req, res) => {
   const picked = pickRandom(inactive, 2);
   if (!isRefill) {
     user.selection_pool = picked;
+    req.app.locals.writeJSON('users.json', users);
   }
-  req.app.locals.writeJSON('users.json', users);
   const cards = picked.map(id => {
     const m = missions.find(mm => mm.id === id);
     return { id: m.id, mission: m.mission };
   });
-  res.json({ cards, selected: countActiveSlots(user), total: isRefill ? 1 : 5, complete: false });
+  res.json({ cards, selected: isRefill ? 0 : countActiveSlots(user), total: isRefill ? 1 : 5, complete: false });
 });
 
 router.post('/select', (req, res) => {
@@ -167,9 +167,12 @@ router.post('/status', (req, res) => {
   const now = new Date().toISOString();
 
   if (!user.wallet) user.wallet = [];
-  if (!user.success_cooldown_count) user.success_cooldown_count = 0;
-  if (!user.fail_cooldown_count) user.fail_cooldown_count = 0;
+  if (user.success_cooldown_count == null) user.success_cooldown_count = 0;
+  if (user.fail_cooldown_count == null) user.fail_cooldown_count = 0;
+  user.success_cooldown_count = Number(user.success_cooldown_count);
+  user.fail_cooldown_count = Number(user.fail_cooldown_count);
   if (user.completed_count === undefined) user.completed_count = 0;
+  user.completed_count = Number(user.completed_count);
 
   if (status === 'completed') {
     const cooldown = successCooldown(user.success_cooldown_count);
@@ -192,9 +195,8 @@ router.post('/status', (req, res) => {
       if (allGotted) user.gotted_history = [];
     }
 
-    const io = req.app.locals.io;
     const gotStr = gotted === 'Group' ? 'The group' : (gotted || 'Someone');
-    io.emit('chat_message', {
+    req.app.locals.addChatMessage({
       type: 'system',
       text: `${user.name} completed mission: ${mission.mission}. ${gotStr} was got!`,
       comment: comments || '',
@@ -212,8 +214,7 @@ router.post('/status', (req, res) => {
     });
     user.slot_cooldowns[missionIndex] = new Date(Date.now() + cooldown * 60000).toISOString();
 
-    const io = req.app.locals.io;
-    io.emit('chat_message', {
+    req.app.locals.addChatMessage({
       type: 'system_fail',
       text: `${user.name} failed mission: ${mission.mission}.`,
       timestamp: now

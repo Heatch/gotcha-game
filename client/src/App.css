@@ -1030,19 +1030,6 @@ body {
   margin-top: 40vh;
 }
 
-.win-banner {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #c8985a;
-  background: rgba(200, 152, 90, 0.12);
-  border: 1px solid rgba(200, 152, 90, 0.3);
-  border-radius: 10px;
-  padding: 8px 16px;
-  max-width: 380px;
-  width: 100%;
-}
-
 .refill-banner {
   text-align: center;
   font-size: 13px;
