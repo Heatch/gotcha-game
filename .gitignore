@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.firebase/
 server/data/users.json
 server/data/missions.json
 server/data/chat.json

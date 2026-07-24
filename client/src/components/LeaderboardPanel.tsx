@@ -57,7 +57,7 @@ export default function LeaderboardPanel({ open, onClose }: Props) {
                 <p className="lb-empty">No players yet.</p>
               )}
             </div>
-            <p className="lb-anon-note">Names are anonymous &mdash; winner stays a surprise!</p>
+            <p className="lb-anon-note">Names are anonymous &mdash; keep it secret!</p>
           </motion.div>
         </motion.div>
       )}

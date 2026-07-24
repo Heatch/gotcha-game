@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "User",
   "type": "object",
-  "required": ["name", "password", "pseudonym", "missions", "slot_cooldowns", "wallet", "completed_count", "success_cooldown_count", "fail_cooldown_count", "selection_complete", "selection_pool", "score", "gotted_history"],
+  "required": ["name", "password", "pseudonym", "missions", "slot_cooldowns", "wallet", "completed_count", "cooldown_count", "selection_complete", "selection_pool", "score", "gotted_history"],
   "properties": {
     "name": { "type": "string" },
     "password": { "type": "string" },
@@ -47,8 +47,7 @@
       }
     },
     "completed_count": { "type": "integer", "minimum": 0 },
-    "success_cooldown_count": { "type": "integer", "minimum": 0 },
-    "fail_cooldown_count": { "type": "integer", "minimum": 0 },
+    "cooldown_count": { "type": "integer", "minimum": 0 },
     "selection_complete": { "type": "boolean" },
     "selection_pool": { "type": "array", "items": { "type": "number" } },
     "score": { "type": "integer" },

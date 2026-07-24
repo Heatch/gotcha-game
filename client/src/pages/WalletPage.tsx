@@ -137,14 +137,6 @@ export default function WalletPage() {
         <p className="wallet-score">score: {user.completed_count ?? 0}</p>
       </header>
 
-      {(user.completed_count ?? 0) >= 3 && (
-        <div className="win-banner">You've won! Keep playing to fill your wallet.</div>
-      )}
-
-      {(user.completed_count ?? 0) >= 3 && (
-        <div className="win-banner">You've won! Keep playing to fill your wallet.</div>
-      )}
-
       <div className="folder-container">
         <div className="folder-tab">Mission Wallet</div>
         <div className="folder-body wallet-scroll">

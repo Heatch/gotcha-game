@@ -22,8 +22,7 @@ export interface User {
   slot_cooldowns: (string | null)[];
   wallet: WalletEntry[];
   completed_count: number;
-  success_cooldown_count: number;
-  fail_cooldown_count: number;
+  cooldown_count: number;
   selection_complete: boolean;
   selection_pool: number[];
   score: number;
