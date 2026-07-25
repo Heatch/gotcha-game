@@ -48,7 +48,7 @@ router.get('/pool', (req, res) => {
     return res.json({ cards: [], selected: countActiveSlots(user), total: 5, complete: true });
   }
 
-  if (!isRefill && user.selection_pool && user.selection_pool.length === 2) {
+  if (user.selection_pool && user.selection_pool.length === 2) {
     const cards = user.selection_pool.map(id => {
       const m = missions.find(mm => mm.id === id);
       return m ? { id: m.id, mission: m.mission } : null;
@@ -60,10 +60,8 @@ router.get('/pool', (req, res) => {
 
   const inactive = getInactiveMissionIds(missions);
   const picked = pickRandom(inactive, 2);
-  if (!isRefill) {
-    user.selection_pool = picked;
-    req.app.locals.writeJSON('users.json', users);
-  }
+  user.selection_pool = picked;
+  req.app.locals.writeJSON('users.json', users);
   const cards = picked.map(id => {
     const m = missions.find(mm => mm.id === id);
     return { id: m.id, mission: m.mission };
@@ -89,6 +87,10 @@ router.post('/select', (req, res) => {
     return res.status(409).json({ error: 'Mission already taken' });
   }
 
+  if (user.selection_pool && !user.selection_pool.includes(missionId)) {
+    return res.status(400).json({ error: 'Mission not in current selection pool' });
+  }
+
   mission.state = 'active';
   const newMission = { mission: mission.mission, status: 'open', last_edit: '', gotted: '', comments: '' };
 
@@ -96,6 +98,7 @@ router.post('/select', (req, res) => {
     const slotIdx = user.missions.findIndex(m => m === null);
     if (slotIdx === -1) return res.status(400).json({ error: 'No empty slot available' });
     user.missions[slotIdx] = newMission;
+    user.selection_pool = [];
     req.app.locals.writeJSON('missions.json', missions);
     req.app.locals.writeJSON('users.json', users);
     const { password: _, ...safeUser } = user;
